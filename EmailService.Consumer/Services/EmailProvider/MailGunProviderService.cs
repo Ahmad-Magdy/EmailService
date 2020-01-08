@@ -27,6 +27,8 @@ namespace EmailService.Consumer.Services.EmailProvider
             _logger = logger;
         }
 
+        public string ProviderName => "MailGun";
+
         public async Task SendEmail(string sender, string reciver, string subject, string body)
         {
             var domain = _emailProvidersConfig.CurrentValue.EmailProviders.MailGun.Domain;

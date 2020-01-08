@@ -17,6 +17,8 @@ namespace EmailService.Consumer.Services.EmailProvider
             _logger = logger;
         }
 
+        public string ProviderName => "SendGrid";
+
         public async Task SendEmail(string sender, string reciver, string subject, string body)
         {
             var from = new EmailAddress(sender);

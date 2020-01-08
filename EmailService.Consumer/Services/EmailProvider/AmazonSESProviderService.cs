@@ -24,6 +24,7 @@ namespace EmailService.Consumer.Services.EmailProvider
                         emailProvidersConfig.CurrentValue.EmailProviders.AmazonSES.KeySecret, RegionEndpoint.EUWest1);
         }
 
+        public string ProviderName => "AWSSES";
 
         public async Task SendEmail(string sender, string reciver, string subject, string body)
         {
