@@ -5,10 +5,17 @@ using Microsoft.Extensions.Logging;
 
 namespace EmailService.Consumer
 {
-    public static class EmailService
+    public class EmailService
     {
+        private ILogger<EmailService> _logger;
+
+        public EmailService( ILogger<EmailService> logger)
+        {
+            _logger = logger;
+        }
+
         [FunctionName("EmailService")]
-        public static void Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]string myQueueItem, ILogger log)
+        public void Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]string myQueueItem)
         {
             log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
         }
