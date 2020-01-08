@@ -7,6 +7,7 @@ using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 using Amazon;
 using EmailService.Consumer.Config;
+
 namespace EmailService.Consumer.Services.EmailProvider
 {
     public class AmazonSESProvider : IEmailProvider
