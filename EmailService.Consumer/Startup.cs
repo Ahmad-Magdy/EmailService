@@ -10,6 +10,7 @@ using SendGrid;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
+using EmailService.Consumer.Services.EmailProvider;
 
 [assembly: FunctionsStartup(typeof(EmailService.Consumer.Startup))]
 namespace EmailService.Consumer
@@ -63,6 +64,9 @@ namespace EmailService.Consumer
                 return new SendGridClient(api);
             });
 
+            builder.Services.AddSingleton<IEmailProvider, SendGridProviderService>();
+            builder.Services.AddSingleton<IEmailProvider, MailGunProviderService>();
+            builder.Services.AddSingleton<IEmailProvider, AmazonSESProviderService>();
         }
     }
 }

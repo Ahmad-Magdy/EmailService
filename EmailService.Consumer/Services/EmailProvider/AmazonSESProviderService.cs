@@ -10,13 +10,13 @@ using EmailService.Consumer.Config;
 
 namespace EmailService.Consumer.Services.EmailProvider
 {
-    public class AmazonSESProvider : IEmailProvider
+    public class AmazonSESProviderService : IEmailProvider
     {
-        ILogger<AmazonSESProvider> _logger;
+        ILogger<AmazonSESProviderService> _logger;
         private AmazonSimpleEmailServiceClient _awsSES;
         private IOptionsMonitor<ConfigOptions> _emailProvidersConfig;
 
-        public AmazonSESProvider(IOptionsMonitor<ConfigOptions> emailProvidersConfig, ILogger<AmazonSESProvider> logger)
+        public AmazonSESProviderService(IOptionsMonitor<ConfigOptions> emailProvidersConfig, ILogger<AmazonSESProviderService> logger)
         {
             _logger = logger;
             // TODO: Remove redundnt method call
