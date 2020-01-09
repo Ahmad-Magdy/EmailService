@@ -10,6 +10,8 @@ using Sentry;
 using System.Linq;
 using Microsoft.Extensions.Options;
 using EmailService.Consumer.Config;
+using EmailService.Consumer.Models;
+using Newtonsoft.Json;
 
 namespace EmailService.Consumer
 {
@@ -30,7 +32,7 @@ namespace EmailService.Consumer
         }
 
         [FunctionName("EmailService")]
-        public async Task RunAsync([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]Object myQueueItem)
+        public async Task RunAsync([QueueTrigger("email-items", Connection = "EmailServiceStorageCS")]EmailQueueItem emailQueueItem)
         {
             using (SentrySdk.Init(_configOptions.Value.Sentry.Dsn))
             {
@@ -38,6 +40,7 @@ namespace EmailService.Consumer
                 {
                     var currentImplementation = "SendGrid";
                     var emailService = _emailProviders[currentImplementation];
+                    await _emailProvider.SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
                 }
                 catch (Exception ex)
                 {
@@ -46,7 +49,7 @@ namespace EmailService.Consumer
                 }
                 finally
                 {
-                    _logger.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
+                    _logger.LogInformation($"C# Queue trigger function processed: {emailQueueItem}");
                 }
             }
 
