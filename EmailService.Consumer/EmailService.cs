@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using EmailService.Consumer.Config;
 using EmailService.Consumer.Models;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace EmailService.Consumer
 {
@@ -34,6 +35,7 @@ namespace EmailService.Consumer
         [FunctionName("EmailService")]
         public async Task RunAsync([QueueTrigger("email-items", Connection = "EmailServiceStorageCS")]EmailQueueItem emailQueueItem)
         {
+            var stopWatch = Stopwatch.StartNew();
             using (SentrySdk.Init(_configOptions.Value.Sentry.Dsn))
             {
                 try
@@ -53,6 +55,8 @@ namespace EmailService.Consumer
                 }
                 finally
                 {
+                    stopWatch.Stop();
+                    _logger.LogInformation($"The request processing time was {stopWatch.ElapsedMilliseconds}");
                     _logger.LogInformation($"C# Queue trigger function processed: {JsonConvert.SerializeObject(emailQueueItem)}");
                 }
             }
