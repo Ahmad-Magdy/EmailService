@@ -23,9 +23,16 @@ namespace EmailService.Consumer.Extensions
             {
                 loggerConfig = loggerConfig.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(humioOptions.IngestUrl))
                 {
+                    FailureCallback = e => Console.WriteLine("Unable to submit event " + e.MessageTemplate),
+                    EmitEventFailure = EmitEventFailureHandling.RaiseCallback,
                     MinimumLogEventLevel = LogEventLevel.Information,
                     ModifyConnectionSettings = x => x.BasicAuthentication(username: "", password: humioOptions.Token)
                 });
+            }
+            var sentryDsn = Environment.GetEnvironmentVariable("sentry__dsn");
+            if (!string.IsNullOrEmpty(sentryDsn))
+            {
+                loggerConfig = loggerConfig.WriteTo.Sentry(sentryDsn);
             }
 
             if (Environment.GetEnvironmentVariable("Environment") == "Development")
