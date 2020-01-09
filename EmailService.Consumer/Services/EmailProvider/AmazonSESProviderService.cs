@@ -14,14 +14,13 @@ namespace EmailService.Consumer.Services.EmailProvider
     {
         ILogger<AmazonSESProviderService> _logger;
         private AmazonSimpleEmailServiceClient _awsSES;
-        private IOptionsMonitor<ConfigOptions> _emailProvidersConfig;
 
-        public AmazonSESProviderService(IOptionsMonitor<ConfigOptions> emailProvidersConfig, ILogger<AmazonSESProviderService> logger)
+        public AmazonSESProviderService(IOptions<ConfigOptions> emailProvidersConfig, ILogger<AmazonSESProviderService> logger)
         {
             _logger = logger;
             // TODO: Remove redundnt method call
-            _awsSES = new AmazonSimpleEmailServiceClient(emailProvidersConfig.CurrentValue.EmailProviders.AmazonSES.KeyId,
-                        emailProvidersConfig.CurrentValue.EmailProviders.AmazonSES.KeySecret, RegionEndpoint.EUWest1);
+            _awsSES = new AmazonSimpleEmailServiceClient(emailProvidersConfig.Value.EmailProviders.AmazonSES.KeyId,
+                        emailProvidersConfig.Value.EmailProviders.AmazonSES.KeySecret, RegionEndpoint.EUWest1);
         }
 
         public string ProviderName => "AWSSES";
