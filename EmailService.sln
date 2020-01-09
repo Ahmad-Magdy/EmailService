@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.Consumer", "Em
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.ConsolePublisher", "EmailService.ConsolePublisher\EmailService.ConsolePublisher.csproj", "{8F99820D-3243-499F-BA2A-35E9B2B32F2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService.Consumer.Test", "EmailService.Consumer.Test\EmailService.Consumer.Test.csproj", "{643C58C9-90DE-4BAB-9625-7E1C2A85C209}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,5 +21,9 @@ Global
 		{8F99820D-3243-499F-BA2A-35E9B2B32F2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F99820D-3243-499F-BA2A-35E9B2B32F2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F99820D-3243-499F-BA2A-35E9B2B32F2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{643C58C9-90DE-4BAB-9625-7E1C2A85C209}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{643C58C9-90DE-4BAB-9625-7E1C2A85C209}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{643C58C9-90DE-4BAB-9625-7E1C2A85C209}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{643C58C9-90DE-4BAB-9625-7E1C2A85C209}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
