@@ -17,7 +17,6 @@ namespace EmailService.Consumer.Services.EmailProvider
 
         public async Task SendEmail(string sender, string reciver, string subject, string body)
         {
-            _logger.LogError("Something went wrong in Fake");
             // Do Some Magic
             await Task.Delay(TimeSpan.FromMilliseconds(200));
         }
