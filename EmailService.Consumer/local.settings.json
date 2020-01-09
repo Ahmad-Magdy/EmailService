@@ -1,7 +1,17 @@
 {
-    "IsEncrypted": false,
-    "Values": {
-        "AzureWebJobsStorage": "",
-        "FUNCTIONS_WORKER_RUNTIME": "dotnet"
-    }
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "EmailServiceStorageCS": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "humio__token": "YOUR_TOKEN",
+    "humio__ingesturl": "https://cloud.humio.com/api/v1/ingest/elastic-bulk",
+    "sentry__dsn": "Your DSN",
+    "emailproviders__sendgrid__apikey": "APIKEY",
+    "emailproviders__mailgun__apikey": "API_KEY",
+    "emailproviders__mailgun__domain": "yourdomain.mailgun.org",
+    "emailproviders__mailgun__baseurl": "https://api.mailgun.net",
+    "emailproviders__amazonses__keyid": "APIKEY",
+    "emailproviders__amazonses__keysecret": "SECRET"
+  }
 }
