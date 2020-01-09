@@ -38,18 +38,22 @@ namespace EmailService.Consumer
             {
                 try
                 {
-                    var currentImplementation = "SendGrid";
-                    var emailService = _emailProviders[currentImplementation];
+                    /*
+                    * It can also be something like
+                    * var currentImplementation = "SendGrid";
+                    * var emailService = _emailProviders[currentImplementation];
+                    */
                     await _emailProvider.SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
                 }
                 catch (Exception ex)
                 {
+                    // Capture the exception and send it to Sentry, then rethrow it to retry executing it.
                     SentrySdk.CaptureException(ex);
                     throw ex;
                 }
                 finally
                 {
-                    _logger.LogInformation($"C# Queue trigger function processed: {emailQueueItem}");
+                    _logger.LogInformation($"C# Queue trigger function processed: {JsonConvert.SerializeObject(emailQueueItem)}");
                 }
             }
 
