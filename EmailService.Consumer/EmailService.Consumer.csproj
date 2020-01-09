@@ -29,5 +29,6 @@
   <ItemGroup>
     <Folder Include="Services\" />
     <Folder Include="Services\EmailProvider\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
 </Project>
