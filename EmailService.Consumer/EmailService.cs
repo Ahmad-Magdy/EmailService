@@ -43,7 +43,7 @@ namespace EmailService.Consumer
                 try
                 {
                     var validator = new EmailQueueItemValidator();
-                    var validationResults = validator.Validate(emailQueueItem);
+                    var validationResults = await validator.ValidateAsync(emailQueueItem);
                     if (!validationResults.IsValid)
                     {
                         var errorMessage = validationResults.Errors

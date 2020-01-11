@@ -9,6 +9,7 @@ using EmailService.Consumer.Services.EmailProvider;
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 using EmailService.Consumer.Config;
+using System.Threading.Tasks;
 
 namespace EmailService.Consumer.Test
 {
@@ -16,7 +17,7 @@ namespace EmailService.Consumer.Test
     {
 
         [Fact]
-        public async void EmailServiceTriggerFunctionShouldLogProcessingTime()
+        public async Task EmailServiceTriggerFunctionShouldLogProcessingTime()
         {
             var emailProviderlogger = (ListLogger<FakeProviderService>)TestFactory.CreateLogger<FakeProviderService>(LoggerTypes.List);
             var functionLogger = (ListLogger<EmailService>)TestFactory.CreateLogger<EmailService>(LoggerTypes.List);
@@ -26,15 +27,15 @@ namespace EmailService.Consumer.Test
 
             var options = Options.Create(new ConfigOptions() { Sentry = new SentryOptions(), EmailProviders = new EmailProviders { SendGrid = new Config.SendGrid { ApiKey = "" } } });
 
-            var e = new EmailService(emailProvider, functionLogger, serviceCollection.BuildServiceProvider(), options);
+            var emailServiceFunction = new EmailService(emailProvider, functionLogger, serviceCollection.BuildServiceProvider(), options);
 
-            await e.RunAsync(new Models.EmailQueueItem { Sender = "me@test.dk", Reciver = "reciver@test.dk", Subject = "Subject", Body = "MyText" });
+            await emailServiceFunction.RunAsync(new Models.EmailQueueItem { Sender = "me@test.dk", Reciver = "reciver@test.dk", Subject = "Subject", Body = "MyText" });
             var msg = functionLogger.Logs[0];
             Assert.Contains("The request processing time was", msg);
         }
 
         [Fact]
-        public async void EmailServiceTriggerFunctionMustNotProcessEmptyQueueItem()
+        public async Task EmailServiceTriggerFunctionMustNotProcessEmptyQueueItem()
         {
             var emailProviderlogger = (ListLogger<FakeProviderService>)TestFactory.CreateLogger<FakeProviderService>(LoggerTypes.List);
             var functionLogger = (ListLogger<EmailService>)TestFactory.CreateLogger<EmailService>(LoggerTypes.List);
@@ -44,9 +45,9 @@ namespace EmailService.Consumer.Test
 
             var options = Options.Create(new ConfigOptions() { Sentry = new SentryOptions(), EmailProviders = new EmailProviders { SendGrid = new Config.SendGrid { ApiKey = "" } } });
 
-            var e = new EmailService(emailProvider, functionLogger, serviceCollection.BuildServiceProvider(), options);
+            var emailServiceFunction = new EmailService(emailProvider, functionLogger, serviceCollection.BuildServiceProvider(), options);
 
-            await e.RunAsync(new Models.EmailQueueItem { });
+            await emailServiceFunction.RunAsync(new Models.EmailQueueItem { });
 
             var msg = functionLogger.Logs[0];
             Assert.Contains("'Sender' must not be empty", msg);
@@ -54,5 +55,6 @@ namespace EmailService.Consumer.Test
             Assert.Contains("'Subject' must not be empty", msg);
             Assert.Contains("'Body' must not be empty", msg);
         }
+
     }
 }
