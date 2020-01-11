@@ -13,6 +13,7 @@ using EmailService.Consumer.Config;
 using EmailService.Consumer.Models;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using EmailService.Consumer.Utils;
 
 namespace EmailService.Consumer
 {
@@ -23,6 +24,7 @@ namespace EmailService.Consumer
         private readonly IOptions<ConfigOptions> _configOptions;
         private List<IEmailProvider> _mylist;
         private Dictionary<string, IEmailProvider> _emailProviders = new Dictionary<string, IEmailProvider>();
+
         public EmailService(IEmailProvider emailProvider, ILogger<EmailService> logger, IServiceProvider serviceProvider, IOptions<ConfigOptions> configOptions)
         {
             _emailProvider = emailProvider;
@@ -40,12 +42,27 @@ namespace EmailService.Consumer
             {
                 try
                 {
-                    /*
-                    * It can also be something like
-                    * var currentImplementation = "SendGrid";
-                    * var emailService = _emailProviders[currentImplementation];
-                    */
-                    await _emailProvider.SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
+                    var validator = new EmailQueueItemValidator();
+                    var validationResults = validator.Validate(emailQueueItem);
+                    if (!validationResults.IsValid)
+                    {
+                        var errorMessage = validationResults.Errors
+                                                            .Select(ve => $"{ve.PropertyName} {ve.ErrorMessage}")
+                                                            .Aggregate("", (acc, curr) => $"{acc}\n{curr}");
+                        _logger.LogError(errorMessage);
+                        _logger.LogError("The provided queue item is invalid and will be skipped");
+                    }
+                    else
+                    {
+                       /*
+                        * It can also be something like
+                        * var currentImplementation = "SendGrid";
+                        * var emailService = _emailProviders[currentImplementation];
+                        */
+
+                        await _emailProvider.SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
+                    }
+
                 }
                 catch (Exception ex)
                 {
