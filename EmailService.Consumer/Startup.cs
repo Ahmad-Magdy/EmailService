@@ -12,6 +12,7 @@ using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 using EmailService.Consumer.Services.EmailProvider;
 using EmailService.Consumer.Extensions;
+using Microsoft.Extensions.Options;
 
 [assembly: FunctionsStartup(typeof(EmailService.Consumer.Startup))]
 namespace EmailService.Consumer
@@ -32,9 +33,9 @@ namespace EmailService.Consumer
 
             builder.Services.AddSingleton((serviceProvider) =>
             {
-                var config = serviceProvider.GetService<IConfiguration>();
-                var api = config.GetValue<string>("emailproviders__sendgrid__apikey");
-                return new SendGridClient(api);
+                var config = serviceProvider.GetService<IOptions<ConfigOptions>>();
+                var apiKey = config.Value.EmailProviders.SendGrid.ApiKey;
+                return new SendGridClient(apiKey);
             });
 
             builder.Services.AddSingleton<IEmailProvider, SendGridProviderService>();
