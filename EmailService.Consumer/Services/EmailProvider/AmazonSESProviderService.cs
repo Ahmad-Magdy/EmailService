@@ -25,7 +25,7 @@ namespace EmailService.Consumer.Services.EmailProvider
 
         public string ProviderName => "AWSSES";
 
-        public async Task SendEmail(string sender, string reciver, string subject, string body)
+        public async Task<bool> SendEmail(string sender, string reciver, string subject, string body)
         {
             var sendRequest = new SendEmailRequest
             {
@@ -54,6 +54,7 @@ namespace EmailService.Consumer.Services.EmailProvider
             {
                 var response = await _awsSES.SendEmailAsync(sendRequest);
                 _logger.LogInformation($"Sent Email with response {(int)response.HttpStatusCode}");
+                return true;
             }
             catch (Exception ex)
             {

@@ -15,11 +15,12 @@ namespace EmailService.Consumer.Services.EmailProvider
 
         public string ProviderName => "Fake";
 
-        public async Task SendEmail(string sender, string reciver, string subject, string body)
+        public async Task<bool> SendEmail(string sender, string reciver, string subject, string body)
         {
             // Do Some Magic
             _logger.LogInformation("Calling SendEmail from Fake email service ");
             await Task.Delay(TimeSpan.FromMilliseconds(200));
+            return false;
         }
     }
 }

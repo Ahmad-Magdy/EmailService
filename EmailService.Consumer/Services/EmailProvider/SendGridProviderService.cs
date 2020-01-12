@@ -19,7 +19,7 @@ namespace EmailService.Consumer.Services.EmailProvider
 
         public string ProviderName => "SendGrid";
 
-        public async Task SendEmail(string sender, string reciver, string subject, string body)
+        public async Task<bool> SendEmail(string sender, string reciver, string subject, string body)
         {
             var from = new EmailAddress(sender);
             var to = new EmailAddress(reciver);
@@ -31,7 +31,9 @@ namespace EmailService.Consumer.Services.EmailProvider
             {
                 var responseBody = await response.Body.ReadAsStringAsync();
                 _logger.LogError(responseBody);
+                return false;
             }
+            return true;
 
         }
     }

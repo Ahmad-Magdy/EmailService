@@ -29,7 +29,7 @@ namespace EmailService.Consumer.Services.EmailProvider
 
         public string ProviderName => "MailGun";
 
-        public async Task SendEmail(string sender, string reciver, string subject, string body)
+        public async Task<bool> SendEmail(string sender, string reciver, string subject, string body)
         {
             var domain = _emailProvidersConfig.CurrentValue.EmailProviders.MailGun.Domain;
             var emailDetails = new Dictionary<string, string> {
@@ -44,7 +44,9 @@ namespace EmailService.Consumer.Services.EmailProvider
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
                 _logger.LogError(responseBody);
+                return false;
             }
+            return true;
         }
     }
 
