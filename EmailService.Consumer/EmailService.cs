@@ -14,6 +14,7 @@ using EmailService.Consumer.Models;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using EmailService.Consumer.Utils;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace EmailService.Consumer
 {
@@ -35,8 +36,21 @@ namespace EmailService.Consumer
         }
 
         [FunctionName("EmailService")]
-        public async Task RunAsync([QueueTrigger("email-items", Connection = "EmailServiceStorageCS")]EmailQueueItem emailQueueItem)
+        public async Task RunAsync([QueueTrigger("email-items", Connection = "EmailServiceStorageCS")]EmailQueueItem emailQueueItem,
+            [DurableClient] IDurableEntityClient client)
         {
+            var entityId = new EntityId(nameof(EmailProvidersStatus), "emailProviderState");
+            var entity = await client.ReadEntityStateAsync<EmailProvidersStatus>(entityId);
+            string providerToUse;
+            // Entity doesn't exist yet, take the first supported provider
+            if (!entity.EntityExists)
+                providerToUse = _configOptions.Value.EmailProvidersSettings.SupportedProviders.FirstOrDefault();
+            else
+                providerToUse = await entity.EntityState.Get();
+
+            if (string.IsNullOrEmpty(providerToUse))
+                throw new Exception("No Email Providers are found, maybe all providers are disabled because there are unhealthy!. Using retries..");
+
             var stopWatch = Stopwatch.StartNew();
             using (SentrySdk.Init(_configOptions.Value.Sentry.Dsn))
             {
@@ -54,13 +68,7 @@ namespace EmailService.Consumer
                     }
                     else
                     {
-                       /*
-                        * It can also be something like
-                        * var currentImplementation = "SendGrid";
-                        * var emailService = _emailProviders[currentImplementation];
-                        */
-
-                        await _emailProvider.SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
+                        await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
                     }
 
                 }
