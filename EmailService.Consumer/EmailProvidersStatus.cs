@@ -130,10 +130,10 @@ namespace EmailService.Consumer
 
             // get Items to delete or postpone
 
-
+            var entityKey = Entity.Current?.EntityKey ?? "";
             if (FailureWindow[req.ProdiverName].Count >= threshold)
             {
-                _logger.LogCritical($"{Entity.Current.EntityKey} Stop using email provider {req.ProdiverName} because it exceeded the threshold {threshold}. Number of failure is {FailureWindow[req.ProdiverName].Count}");
+                _logger.LogCritical($"{entityKey} Stop using email provider {req.ProdiverName} because it exceeded the threshold {threshold}. Number of failure is {FailureWindow[req.ProdiverName].Count}");
 
                 emailProviders.Remove(req.ProdiverName);
                 var disablePeriod = _configOptions.Value.EmailProvidersSettings.DisablePeriod;
@@ -142,7 +142,7 @@ namespace EmailService.Consumer
             }
             else
             {
-                _logger.LogInformation($"{Entity.Current.EntityKey} New failure acconted for provider {req.ProdiverName} but it didn't reach the threshold in the timewindow yet.");
+                _logger.LogInformation($"{entityKey} New failure acconted for provider {req.ProdiverName} but it didn't reach the threshold in the timewindow yet.");
             }
 
         }

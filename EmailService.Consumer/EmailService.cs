@@ -70,9 +70,7 @@ namespace EmailService.Consumer
                     {
                         var isSuccessful = await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
                         if (!isSuccessful)
-                            await client.SignalEntityAsync<IEmailProvidersStatus>(entityId, e =>
-                                                e.AddFailure(new FailureRequest { ProdiverName = providerToUse, HappenedAt = DateTimeOffset.UtcNow }));
-
+                            await client.SignalEntityAsync(entityId, "AddFailure", new FailureRequest { ProdiverName = providerToUse, HappenedAt = DateTimeOffset.UtcNow });
                     }
 
                 }
@@ -80,8 +78,7 @@ namespace EmailService.Consumer
                 {
                     // Capture the exception and send it to Sentry, then rethrow it to retry executing it.
                     SentrySdk.CaptureException(ex);
-                    await client.SignalEntityAsync<IEmailProvidersStatus>(entityId, e =>
-                    e.AddFailure(new FailureRequest { ProdiverName = providerToUse, HappenedAt = DateTimeOffset.UtcNow }));
+                    await client.SignalEntityAsync(entityId, "AddFailure", new FailureRequest { ProdiverName = providerToUse, HappenedAt = DateTimeOffset.UtcNow });
                     throw ex;
                 }
                 finally
