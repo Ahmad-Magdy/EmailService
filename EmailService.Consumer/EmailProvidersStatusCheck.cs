@@ -10,10 +10,11 @@ namespace EmailService.Consumer
     public static class EmailProvidersStatusCheck
     {
         [FunctionName("EmailProvidersStatusCheck")]
-        public static async Task Run([TimerTrigger("0 */1 * * * *")]TimerInfo myTimer, [DurableClient] IDurableEntityClient client, ILogger log)
+        public static async Task Run([TimerTrigger("0 */3 * * * *")]TimerInfo myTimer, [DurableClient] IDurableEntityClient client, ILogger log)
         {
-            var entityId = new EntityId(nameof(EmailProvidersStatus), "emailProviderState");
+            var entityId = new EntityId(nameof(EmailProvidersStatus), "emailproviderstatus");
             await client.SignalEntityAsync<IEmailProvidersStatus>(entityId, s => s.CheckDisabledProvidersStatus());
+
             log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
         }
     }
