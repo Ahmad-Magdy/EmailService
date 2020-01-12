@@ -39,7 +39,7 @@ namespace EmailService.Consumer
         public async Task RunAsync([QueueTrigger("email-items", Connection = "EmailServiceStorageCS")]EmailQueueItem emailQueueItem,
             [DurableClient] IDurableEntityClient client)
         {
-            var entityId = new EntityId(nameof(EmailProvidersStatus), "emailProviderState");
+            var entityId = new EntityId(nameof(EmailProvidersStatus), "emailproviderstatus");
             var entity = await client.ReadEntityStateAsync<EmailProvidersStatus>(entityId);
             string providerToUse;
             // Entity doesn't exist yet, take the first supported provider
@@ -68,7 +68,11 @@ namespace EmailService.Consumer
                     }
                     else
                     {
-                        await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
+                        var isSuccessful = await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
+                        if (!isSuccessful)
+                            await client.SignalEntityAsync<IEmailProvidersStatus>(entityId, e =>
+                                                e.AddFailure(new FailureRequest { ProdiverName = providerToUse, HappenedAt = DateTimeOffset.UtcNow }));
+
                     }
 
                 }
@@ -76,6 +80,8 @@ namespace EmailService.Consumer
                 {
                     // Capture the exception and send it to Sentry, then rethrow it to retry executing it.
                     SentrySdk.CaptureException(ex);
+                    await client.SignalEntityAsync<IEmailProvidersStatus>(entityId, e =>
+                    e.AddFailure(new FailureRequest { ProdiverName = providerToUse, HappenedAt = DateTimeOffset.UtcNow }));
                     throw ex;
                 }
                 finally
