@@ -42,6 +42,7 @@ namespace EmailService.Consumer
             builder.Services.AddSingleton<IEmailProvider, MailGunProviderService>();
             builder.Services.AddSingleton<IEmailProvider, AmazonSESProviderService>();
             builder.Services.AddSingleton<IEmailProvider, FakeProviderService>();
+            builder.Services.AddSingleton<IEmailProvider, Fake2ProviderService>();
         }
     }
 }
