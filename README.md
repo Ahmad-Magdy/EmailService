@@ -31,7 +31,7 @@ If the run failed it will send a signal (one-way call) to the `Email Providers S
 
 If it failed to run the function it will retry 5 times then queue it in the poisoned items queue, the time between each retry is 30 seconds and can be configured from the settings.
 
-### EmailProvidersStatusCheck
+#### EmailProvidersStatusCheck
 A small time trigger function that will run every x minutes in my case 3 minutes. It will send a signal to the email provider status function to check the disabled providers and if the disable time of any of them has passed to return it to the providers.
 
 
