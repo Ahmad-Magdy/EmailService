@@ -39,21 +39,20 @@ namespace EmailService.Consumer
         public async Task RunAsync([QueueTrigger("email-items", Connection = "EmailServiceStorageCS")]EmailQueueItem emailQueueItem,
             [DurableClient] IDurableEntityClient client)
         {
-            var entityId = new EntityId(nameof(EmailProvidersStatus), "emailproviderstatus");
-            var entity = await client.ReadEntityStateAsync<EmailProvidersStatus>(entityId);
-            string providerToUse;
-            // Entity doesn't exist yet, take the first supported provider
-            if (!entity.EntityExists)
-                providerToUse = _configOptions.Value.EmailProvidersSettings.SupportedProviders.FirstOrDefault();
-            else
-                providerToUse = await entity.EntityState.Get();
-
-            if (string.IsNullOrEmpty(providerToUse))
-                throw new Exception("No Email Providers are found, maybe all providers are disabled because there are unhealthy!. Using retries..");
-
             var stopWatch = Stopwatch.StartNew();
             using (SentrySdk.Init(_configOptions.Value.Sentry.Dsn))
             {
+                var entityId = new EntityId(nameof(EmailProvidersStatus), "emailproviderstatus");
+                var entity = await client.ReadEntityStateAsync<EmailProvidersStatus>(entityId);
+                string providerToUse;
+                // Entity doesn't exist yet, take the first supported provider
+                if (!entity.EntityExists)
+                    providerToUse = _configOptions.Value.EmailProvidersSettings.SupportedProviders.FirstOrDefault();
+                else
+                    providerToUse = await entity.EntityState.Get();
+
+                if (string.IsNullOrEmpty(providerToUse))
+                    throw new Exception("No Email Providers are found, maybe all providers are disabled because there are unhealthy!. Using retries..");
                 try
                 {
                     var validator = new EmailQueueItemValidator();

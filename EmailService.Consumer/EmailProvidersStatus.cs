@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EmailService.Consumer.Config;
+using EmailService.Consumer.Models;
 using EmailService.Consumer.Services.EmailProvider;
 using EmailService.Consumer.Utils;
 using Microsoft.Azure.WebJobs;
@@ -22,17 +23,6 @@ namespace EmailService.Consumer
         void TryAddProviders();
     }
 
-    public class FailureRequest
-    {
-        public string ProdiverName { get; set; }
-        public DateTimeOffset HappenedAt { get; set; }
-
-    }
-    public class DisabledEmailProviderItem
-    {
-        public string Name { get; set; }
-        public DateTimeOffset DueTime { get; set; }
-    }
     [JsonObject(MemberSerialization.OptIn)]
     public class EmailProvidersStatus : IEmailProvidersStatus
     {
@@ -54,29 +44,24 @@ namespace EmailService.Consumer
 
         public EmailProvidersStatus(IOptions<ConfigOptions> configOptions, ILogger<EmailProvidersStatus> logger)
         {
+            // There is a problem in the DI system from Durable Entites, sometimes it works and some other times it provides a null values.
+            // the hack for configoptions to handle it until they provide an update 
             if (configOptions == null)
             {
-                try
+                var configOptionsVals = new ConfigOptions()
                 {
-                    var configOptionsVals = new ConfigOptions()
+                    EmailProvidersSettings = new Models.Config.EmailProvidersSettings
                     {
-                        EmailProvidersSettings = new Models.Config.EmailProvidersSettings
-                        {
-                            DisablePeriod = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__disableperiod")),
-                            Threshold = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__threshold")),
-                            TimeWindowInSeconds = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__timewindowinseconds")),
-                            SupportedProviders = EnvironmentVariables.EnvironmentVariableKeyToArray("emailproviderssettings__supportedproviders"),
-                        }
-                    };
-                    _configOptions = Options.Create<ConfigOptions>(configOptionsVals);
+                        DisablePeriod = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__disableperiod")),
+                        Threshold = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__threshold")),
+                        TimeWindowInSeconds = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__timewindowinseconds")),
+                        SupportedProviders = EnvironmentVariables.EnvironmentVariableKeyToArray("emailproviderssettings__supportedproviders"),
+                    }
+                };
+                _configOptions = Options.Create<ConfigOptions>(configOptionsVals);
 
-                }
-                catch (System.Exception)
-                {
-
-                    throw;
-                }
             }
+            // Hack for logger
             if (logger == null)
             {
                 var logFactory = new LoggerFactory();
