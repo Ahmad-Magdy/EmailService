@@ -67,9 +67,7 @@ namespace EmailService.Consumer
                     }
                     else
                     {
-                        var isSuccessful = await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
-                        if (!isSuccessful)
-                            await client.SignalEntityAsync(entityId, "AddFailure", new FailureRequest { ProdiverName = providerToUse, HappenedAt = DateTimeOffset.UtcNow });
+                        await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
                     }
 
                 }
