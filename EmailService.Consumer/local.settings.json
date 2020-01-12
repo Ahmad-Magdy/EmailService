@@ -6,12 +6,17 @@
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
     "humio__token": "YOUR_TOKEN",
     "humio__ingesturl": "https://cloud.humio.com/api/v1/ingest/elastic-bulk",
-    "sentry__dsn": "Your DSN",
+    "sentry__dsn": "DSN",
     "emailproviders__sendgrid__apikey": "APIKEY",
-    "emailproviders__mailgun__apikey": "API_KEY",
-    "emailproviders__mailgun__domain": "yourdomain.mailgun.org",
+    "emailproviders__mailgun__apikey": "APIKEY",
+    "emailproviders__mailgun__domain": "APIKEY",
     "emailproviders__mailgun__baseurl": "https://api.mailgun.net",
     "emailproviders__amazonses__keyid": "APIKEY",
-    "emailproviders__amazonses__keysecret": "SECRET"
+    "emailproviders__amazonses__keysecret": "APIKEY",
+    "emailproviderssettings__supportedproviders__0": "Fake",
+    "emailproviderssettings__supportedproviders__1": "Fake2",
+    "emailproviderssettings__threshold": 1,
+    "emailproviderssettings__timewindowinseconds": 5,
+    "emailproviderssettings__disableperiod": 30
   }
 }
