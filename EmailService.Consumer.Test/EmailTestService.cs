@@ -39,7 +39,7 @@ namespace EmailService.Consumer.Test
 
             var emailServiceFunction = new EmailService(emailProvider, functionLogger, serviceCollection.BuildServiceProvider(), options);
 
-            await emailServiceFunction.RunAsync(new Models.EmailQueueItem { Sender = "me@test.dk", Reciver = "reciver@test.dk", Subject = "Subject", Body = "MyText" }, durableClient.Object);
+            await emailServiceFunction.RunAsync(new Models.EmailQueueItem { Sender = "me@test.dk", Receiver = "receiver@test.dk", Subject = "Subject", Body = "MyText" }, durableClient.Object);
             var msg = functionLogger.Logs[0];
             Assert.Contains("The request processing time was", msg);
         }
@@ -75,7 +75,7 @@ namespace EmailService.Consumer.Test
 
             var msg = functionLogger.Logs[0];
             Assert.Contains("'Sender' must not be empty", msg);
-            Assert.Contains("'Reciver' must not be empty.", msg);
+            Assert.Contains("'Receiver' must not be empty.", msg);
             Assert.Contains("'Subject' must not be empty", msg);
             Assert.Contains("'Body' must not be empty", msg);
         }

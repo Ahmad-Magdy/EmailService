@@ -127,7 +127,7 @@ namespace EmailService.Consumer
             }
             else
             {
-                _logger.LogInformation($"{entityKey} New failure acconted for provider {req.ProdiverName} but it didn't reach the threshold in the timewindow yet.");
+                _logger.LogInformation($"{entityKey} New failure occurred for provider {req.ProdiverName} but it didn't reach the threshold in the timewindow yet.");
             }
 
         }

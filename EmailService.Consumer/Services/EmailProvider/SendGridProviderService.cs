@@ -20,10 +20,10 @@ namespace EmailService.Consumer.Services.EmailProvider
 
         public string ProviderName => "SendGrid";
 
-        public async Task SendEmail(string sender, string reciver, string subject, string body)
+        public async Task SendEmail(string sender, string receiver, string subject, string body)
         {
             var from = new EmailAddress(sender);
-            var to = new EmailAddress(reciver);
+            var to = new EmailAddress(receiver);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, "", body);
 
             var response = await _sendGridClient.SendEmailAsync(msg);

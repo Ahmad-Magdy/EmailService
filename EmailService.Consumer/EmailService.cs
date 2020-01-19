@@ -67,7 +67,7 @@ namespace EmailService.Consumer
                     }
                     else
                     {
-                        await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Reciver, emailQueueItem.Subject, emailQueueItem.Body);
+                        await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Receiver, emailQueueItem.Subject, emailQueueItem.Body);
                     }
 
                 }

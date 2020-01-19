@@ -1,7 +1,7 @@
 # Email MicroService
 It's a small service to process emails coming from all kinds of clients using Microsoft Storage Queue and Azure functions. 
 
-It uses [Durable Entites](https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-entities) to hold the small state shared between the running functions.
+It uses [Durable Entities](https://docs.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-entities) to hold the small state shared between the running functions.
 
 ### Why Queue and Azure Function?
 The combination between Queue and Function will allow the service to scale up and down smoothly and fast, the integration contains a retry mechanism and can handle the fault.
