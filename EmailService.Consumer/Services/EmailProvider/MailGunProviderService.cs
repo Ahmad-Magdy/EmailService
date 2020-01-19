@@ -29,12 +29,12 @@ namespace EmailService.Consumer.Services.EmailProvider
 
         public string ProviderName => "MailGun";
 
-        public async Task SendEmail(string sender, string reciver, string subject, string body)
+        public async Task SendEmail(string sender, string receiver, string subject, string body)
         {
             var domain = _emailProvidersConfig.CurrentValue.EmailProviders.MailGun.Domain;
             var emailDetails = new Dictionary<string, string> {
-                {"from", $"{sender}" },
-                {"to", reciver},
+                {"from", sender },
+                {"to", receiver},
                 {"subject", subject},
                 {"html",body }
             };

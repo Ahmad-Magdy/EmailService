@@ -10,9 +10,9 @@ namespace EmailService.ConsolePublisher
     {
         static async Task Main(string[] args)
         {
-            var emailConnetioString = Environment.GetEnvironmentVariable("EmailServiceStorageCS");
+            var emailConnetionString = Environment.GetEnvironmentVariable("EmailServiceStorageCS");
             var queueName = Environment.GetEnvironmentVariable("QueueName");
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(emailConnetioString);
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(emailConnetionString);
 
             var queueClient = storageAccount.CreateCloudQueueClient();
             var queue = queueClient.GetQueueReference(queueName);
@@ -23,7 +23,7 @@ namespace EmailService.ConsolePublisher
                 var emailItem = new EmailQueueItem
                 {
                     Sender = "Me@me.com",
-                    Reciver = "m2@m.com",
+                    Receiver = "m2@m.com",
                     Subject = "Subject 1",
                     Body = "Test"
                 };
@@ -38,7 +38,7 @@ namespace EmailService.ConsolePublisher
     public class EmailQueueItem
     {
         public string Sender { get; set; }
-        public string Reciver { get; set; }
+        public string Receiver { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
     }

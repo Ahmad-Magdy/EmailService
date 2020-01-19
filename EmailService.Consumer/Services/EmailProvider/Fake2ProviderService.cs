@@ -15,7 +15,7 @@ namespace EmailService.Consumer.Services.EmailProvider
 
         public string ProviderName => "Fake2";
 
-        public async Task SendEmail(string sender, string reciver, string subject, string body)
+        public async Task SendEmail(string sender, string receiver, string subject, string body)
         {
             // Do Some Magic
             _logger.LogInformation("Calling SendEmail from Fake email service2 ");

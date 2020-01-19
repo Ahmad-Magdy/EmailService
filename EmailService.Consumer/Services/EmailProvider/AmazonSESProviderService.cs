@@ -18,14 +18,14 @@ namespace EmailService.Consumer.Services.EmailProvider
         public AmazonSESProviderService(IOptions<ConfigOptions> emailProvidersConfig, ILogger<AmazonSESProviderService> logger)
         {
             _logger = logger;
-            // TODO: Remove redundnt method call
+            // TODO: Remove redundant method call
             _awsSES = new AmazonSimpleEmailServiceClient(emailProvidersConfig.Value.EmailProviders.AmazonSES.KeyId,
                         emailProvidersConfig.Value.EmailProviders.AmazonSES.KeySecret, RegionEndpoint.EUWest1);
         }
 
         public string ProviderName => "AWSSES";
 
-        public async Task SendEmail(string sender, string reciver, string subject, string body)
+        public async Task SendEmail(string sender, string receiver, string subject, string body)
         {
             var sendRequest = new SendEmailRequest
             {
@@ -33,7 +33,7 @@ namespace EmailService.Consumer.Services.EmailProvider
                 Destination = new Destination
                 {
                     ToAddresses =
-                        new List<string> { reciver }
+                        new List<string> { receiver }
                 },
                 Message = new Message
                 {

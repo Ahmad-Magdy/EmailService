@@ -13,7 +13,7 @@ namespace EmailService.Consumer.Test
             var emailQueueItem = new EmailQueueItem
             {
                 Sender = "test",
-                Reciver = "second@test.co",
+                Receiver = "second@test.co",
                 Subject = "Title",
                 Body = "Body"
             };

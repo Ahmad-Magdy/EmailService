@@ -8,10 +8,10 @@ namespace EmailService.Consumer.Utils
     {
         public EmailQueueItemValidator()
         {
-            RuleFor(x => x.Sender).NotEmpty().EmailAddress() ;
-            RuleFor(x => x.Reciver).NotEmpty().EmailAddress();
+            RuleFor(x => x.Sender).NotEmpty().EmailAddress();
+            RuleFor(x => x.Receiver).NotEmpty().EmailAddress();
             RuleFor(x => x.Subject).NotEmpty();
-            RuleFor(x => x.Body).NotEmpty().MaximumLength(100);
+            RuleFor(x => x.Body).NotEmpty();
         }
     }
 }
