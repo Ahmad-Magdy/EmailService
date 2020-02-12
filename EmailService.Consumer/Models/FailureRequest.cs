@@ -3,7 +3,7 @@ namespace EmailService.Consumer.Models
 {
     public class FailureRequest
     {
-        public string ProdiverName { get; set; }
+        public string ProviderName { get; set; }
         public DateTimeOffset HappenedAt { get; set; }
 
     }

@@ -20,14 +20,14 @@ namespace EmailService.Consumer
         void AddFailure(FailureRequest amount);
         Task<string> Get();
         Task CheckDisabledProvidersStatus();
-        void TryAddProviders();
+        void Init();
     }
 
     [JsonObject(MemberSerialization.OptIn)]
     public class EmailProvidersStatus : IEmailProvidersStatus
     {
         [JsonProperty("emailproviders")]
-        public HashSet<string> emailProviders = new HashSet<string>();
+        public List<string> emailProviders = new List<string>();
         [JsonProperty("is_init")]
         public bool IsFirstTimeToInit = true;
 
@@ -44,40 +44,13 @@ namespace EmailService.Consumer
 
         public EmailProvidersStatus(IOptions<ConfigOptions> configOptions, ILogger<EmailProvidersStatus> logger)
         {
-            // There is a problem in the DI system from Durable Entites, sometimes it works and some other times it provides a null values.
-            // the hack for configoptions to handle it until they provide an update 
-            if (configOptions == null)
-            {
-                var configOptionsVals = new ConfigOptions()
-                {
-                    EmailProvidersSettings = new Models.Config.EmailProvidersSettings
-                    {
-                        DisablePeriod = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__disableperiod")),
-                        Threshold = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__threshold")),
-                        TimeWindowInSeconds = int.Parse(Environment.GetEnvironmentVariable("emailproviderssettings__timewindowinseconds")),
-                        SupportedProviders = EnvironmentVariables.EnvironmentVariableKeyToArray("emailproviderssettings__supportedproviders"),
-                    }
-                };
-                _configOptions = Options.Create<ConfigOptions>(configOptionsVals);
+            _configOptions = configOptions;
+            _logger = logger;
 
-            }
-            // Hack for logger
-            if (logger == null)
-            {
-                var logFactory = new LoggerFactory();
-                _logger = logFactory.CreateLogger<EmailProvidersStatus>();
-            }
-            else
-            {
-                _configOptions = configOptions;
-                _logger = logger;
-            }
-            TryAddProviders();
         }
 
-        public void TryAddProviders()
+        public void Init()
         {
-            // The constructor will be called all the time
             if (IsFirstTimeToInit)
             {
                 var _mylist = _configOptions.Value.EmailProvidersSettings.SupportedProviders;
@@ -86,23 +59,22 @@ namespace EmailService.Consumer
             }
         }
 
-
         public void AddFailure(FailureRequest req)
         {
-            var state = disabledProviders.FirstOrDefault(e => e.Name == req.ProdiverName);
+            var state = disabledProviders.FirstOrDefault(e => e.Name == req.ProviderName);
             if (state != null)
             {
-                _logger.LogInformation($"Tried to add additional failure to {Entity.Current.EntityKey} that is already disabled.");
+                _logger?.LogInformation($"Tried to add additional failure to {Entity.Current.EntityKey} that is already disabled.");
                 return;
             }
             // Counter  because the key will be already exist in the dictionary
-            if (FailureWindow.TryGetValue(req.ProdiverName, out var list))
+            if (FailureWindow.TryGetValue(req.ProviderName, out var list))
             {
                 list.Add(req);
             }
             else
             {
-                FailureWindow.Add(req.ProdiverName, new List<FailureRequest> { req });
+                FailureWindow.Add(req.ProviderName, new List<FailureRequest> { req });
             }
             var timeWindow = TimeSpan.FromSeconds(_configOptions.Value.EmailProvidersSettings.TimeWindowInSeconds);
             var threshold = _configOptions.Value.EmailProvidersSettings.Threshold;
@@ -111,23 +83,23 @@ namespace EmailService.Consumer
             var cutoff = req.HappenedAt.Subtract(timeWindow);
 
             // Filter the window only to exceptions within the cutoff timespan
-            FailureWindow[req.ProdiverName].RemoveAll(p => p.HappenedAt < cutoff);
+            FailureWindow[req.ProviderName].RemoveAll(p => p.HappenedAt < cutoff);
 
             // get Items to delete or postpone
 
             var entityKey = Entity.Current?.EntityKey ?? "";
-            if (FailureWindow[req.ProdiverName].Count >= threshold)
+            if (FailureWindow[req.ProviderName].Count >= threshold)
             {
-                _logger.LogCritical($"{entityKey} Stop using email provider {req.ProdiverName} because it exceeded the threshold {threshold}. Number of failure is {FailureWindow[req.ProdiverName].Count}");
+                _logger?.LogCritical($"{entityKey} Stop using email provider {req.ProviderName} because it exceeded the threshold {threshold}. Number of failure is {FailureWindow[req.ProviderName].Count}");
 
-                emailProviders.Remove(req.ProdiverName);
+                emailProviders.Remove(req.ProviderName);
                 var disablePeriod = _configOptions.Value.EmailProvidersSettings.DisablePeriod;
                 var period = DateTimeOffset.UtcNow.Add(TimeSpan.FromSeconds(disablePeriod));
-                disabledProviders.Add(new DisabledEmailProviderItem { Name = req.ProdiverName, DueTime = period });
+                disabledProviders.Add(new DisabledEmailProviderItem { Name = req.ProviderName, DueTime = period });
             }
             else
             {
-                _logger.LogInformation($"{entityKey} New failure occurred for provider {req.ProdiverName} but it didn't reach the threshold in the timewindow yet.");
+                _logger?.LogInformation($"{entityKey} New failure occurred for provider {req.ProviderName} but it didn't reach the threshold in the timewindow yet.");
             }
 
         }

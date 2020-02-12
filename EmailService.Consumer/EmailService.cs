@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using EmailService.Consumer.Utils;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Serilog.Context;
 
 namespace EmailService.Consumer
 {
@@ -44,45 +45,52 @@ namespace EmailService.Consumer
             {
                 var entityId = new EntityId(nameof(EmailProvidersStatus), "emailproviderstatus");
                 var entity = await client.ReadEntityStateAsync<EmailProvidersStatus>(entityId);
+                await client.SignalEntityAsync<IEmailProvidersStatus>(entityId, s => s.Init());
                 string providerToUse;
                 // Entity doesn't exist yet, take the first supported provider
                 if (!entity.EntityExists)
+                {
                     providerToUse = _configOptions.Value.EmailProvidersSettings.SupportedProviders.FirstOrDefault();
+                }
                 else
                     providerToUse = await entity.EntityState.Get();
 
                 if (string.IsNullOrEmpty(providerToUse))
-                    throw new Exception("No Email Providers are found, maybe all providers are disabled because there are unhealthy!. Using retries..");
-                try
+                    throw new Exception("No Email Providers were found, maybe all providers are disabled because there are unhealthy!. Using retries..");
+                using (LogContext.PushProperty("EmailProvider", providerToUse))
+                using (LogContext.PushProperty("Receiver", emailQueueItem.Receiver))
                 {
-                    var validator = new EmailQueueItemValidator();
-                    var validationResults = await validator.ValidateAsync(emailQueueItem);
-                    if (!validationResults.IsValid)
+                    try
                     {
-                        var errorMessage = validationResults.Errors
-                                                            .Select(ve => $"{ve.PropertyName} {ve.ErrorMessage}")
-                                                            .Aggregate("", (acc, curr) => $"{acc}\n{curr}");
-                        _logger.LogError(errorMessage);
-                        _logger.LogError("The provided queue item is invalid and will be skipped");
-                    }
-                    else
-                    {
-                        await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Receiver, emailQueueItem.Subject, emailQueueItem.Body);
-                    }
+                        var validator = new EmailQueueItemValidator();
+                        var validationResults = await validator.ValidateAsync(emailQueueItem);
+                        if (!validationResults.IsValid)
+                        {
+                            var errorMessage = validationResults.Errors
+                                                                .Select(ve => $"{ve.PropertyName} {ve.ErrorMessage}")
+                                                                .Aggregate("", (acc, curr) => $"{acc}\n{curr}");
+                            _logger.LogError(errorMessage, emailQueueItem);
+                            _logger.LogError("The provided queue item is invalid and will be skipped");
+                        }
+                        else
+                        {
+                            await _emailProviders[providerToUse].SendEmail(emailQueueItem.Sender, emailQueueItem.Receiver, emailQueueItem.Subject, emailQueueItem.Body);
+                        }
 
-                }
-                catch (Exception ex)
-                {
-                    // Capture the exception and send it to Sentry, then rethrow it to retry executing it.
-                    SentrySdk.CaptureException(ex);
-                    await client.SignalEntityAsync(entityId, "AddFailure", new FailureRequest { ProdiverName = providerToUse, HappenedAt = DateTimeOffset.UtcNow });
-                    throw ex;
-                }
-                finally
-                {
-                    stopWatch.Stop();
-                    _logger.LogInformation($"The request processing time was {stopWatch.ElapsedMilliseconds}");
-                    _logger.LogInformation($"C# Queue trigger function processed: {JsonConvert.SerializeObject(emailQueueItem)}");
+                    }
+                    catch (Exception ex)
+                    {
+                        // Capture the exception and send it to Sentry, then rethrow it to retry executing it.
+                        SentrySdk.CaptureException(ex);
+                        await client.SignalEntityAsync(entityId, "AddFailure", new FailureRequest { ProviderName = providerToUse, HappenedAt = DateTimeOffset.UtcNow });
+                        throw ex;
+                    }
+                    finally
+                    {
+                        stopWatch.Stop();
+                        _logger.LogInformation($"The request processing time was {stopWatch.ElapsedMilliseconds}");
+                        _logger.LogInformation($"C# Queue trigger function processed: {JsonConvert.SerializeObject(emailQueueItem)}");
+                    }
                 }
             }
 
