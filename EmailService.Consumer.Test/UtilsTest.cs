@@ -12,7 +12,7 @@ namespace EmailService.Consumer.Test
             string expected = "dXNlcm5hbWU6cGFzc3dvcmQ=";
             string actual = Authentication.GetBasicAuthentication("username", "password");
 
-            Assert.StrictEqual(expected, actual);
+            Assert.Equal(expected, actual);
         }
     }
 }

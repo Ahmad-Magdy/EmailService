@@ -69,8 +69,8 @@ namespace EmailService.Consumer.Test
 
             await emailServiceFunction.RunAsync(new Models.EmailQueueItem { Sender = "me@test.dk", Receiver = "receiver@test.dk", Subject = "Subject", Body = "MyText" }, durableClient.Object);
             // Fake should be disabled 
-            Assert.Equal(1, emailproviderstatus.FailureWindow[emailproviderstatus.emailProviders.First()].Count);
-            Assert.Equal(0, emailproviderstatus.disabledProviders.Count);
+            Assert.Single(emailproviderstatus.FailureWindow[emailproviderstatus.emailProviders.First()]);
+            Assert.Empty(emailproviderstatus.disabledProviders);
             Assert.Equal(2, emailproviderstatus.emailProviders.Count);
 
         }
@@ -119,11 +119,11 @@ namespace EmailService.Consumer.Test
 
             await emailServiceFunction.RunAsync(new Models.EmailQueueItem { Sender = "me@test.dk", Receiver = "receiver@test.dk", Subject = "Subject", Body = "MyText" }, durableClient.Object);
             // Fake should be disabled 
-            Assert.Equal(1,emailproviderstatus.disabledProviders.Count);
-            Assert.StrictEqual("Fake", emailproviderstatus.disabledProviders.First().Name);
+            Assert.Single(emailproviderstatus.disabledProviders);
+            Assert.Equal("Fake", emailproviderstatus.disabledProviders.First().Name);
             // Fake2 Should be enabled
-            Assert.Equal(1, emailproviderstatus.emailProviders.Count);
-            Assert.StrictEqual("Fake2", emailproviderstatus.emailProviders.First());
+            Assert.Single(emailproviderstatus.emailProviders);
+            Assert.Equal("Fake2", emailproviderstatus.emailProviders.First());
         }
 
         [Fact]
@@ -171,12 +171,12 @@ namespace EmailService.Consumer.Test
 
             await emailServiceFunction.RunAsync(new Models.EmailQueueItem { Sender = "me@test.dk", Receiver = "receiver@test.dk", Subject = "Subject", Body = "MyText" }, durableClient.Object);
             await emailServiceFunction.RunAsync(new Models.EmailQueueItem { Sender = "me@test.dk", Receiver = "receiver@test.dk", Subject = "Subject", Body = "MyText" }, durableClient.Object);
-            Assert.Equal(1, emailproviderstatus.disabledProviders.Count);
-            Assert.Equal(1, emailproviderstatus.emailProviders.Count);
-            Assert.StrictEqual("Fake", emailproviderstatus.disabledProviders.First().Name);
+            Assert.Single(emailproviderstatus.disabledProviders);
+            Assert.Single(emailproviderstatus.emailProviders);
+            Assert.Equal("Fake", emailproviderstatus.disabledProviders.First().Name);
             await Task.Delay(TimeSpan.FromSeconds(3));
             await emailproviderstatus.CheckDisabledProvidersStatus();
-            Assert.Equal(0, emailproviderstatus.disabledProviders.Count);
+            Assert.Empty(emailproviderstatus.disabledProviders);
             Assert.Equal(2, emailproviderstatus.emailProviders.Count);
 
         }
